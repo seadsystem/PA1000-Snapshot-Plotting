@@ -10,7 +10,6 @@
 
 import re
 import sys
-import random
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -68,15 +67,13 @@ def normalize_list(word, v_list, a_list, w_list):
       print "none"
 
 #creates a bar graph from a list of numbers with a random color
-def bar_graph(v_list, title):
-   ind1 = np.arange(len(v_list))    # the x locations for the groups
+def bar_graph(v_list, title, colorstring, totalPlots, plotNum):
+   ind1 = np.arange(len(v_list))    # the x locations for the groups   
+   #subplots bar graph   
+   plt.subplot(100 + totalPlots * 10 + plotNum)   
    width = .5
 
-   index = random.randint(0, 4) 
-   colorstring = 'kbgry'
-   
-
-   p1 = plt.bar(ind1 + 0.75, v_list, width, color=colorstring[index])
+   p1 = plt.bar(ind1 + 0.75, v_list, width, color=colorstring, hold=True)
    
    plt.ylabel('Normalized Units')
    plt.title('Harmonics Amplitude of ' + title)
@@ -87,7 +84,6 @@ def bar_graph(v_list, title):
 
    #plt.legend((p1[0], p2[0]), ('Voltage', 'Amperage'))
 
-   plt.show()
 
 #checks for arguments, given usage
 if len(sys.argv) < 2:
@@ -110,10 +106,15 @@ for line in read:
    for word in usefuldata:
       #print word
       normalize_list(word, voltage, amperage, wattage)
+#usage, specify total number of plots, because I modified bar_graph to subplot
+totalPlots = 3
 
-bar_graph(voltage, 'Voltage')
-bar_graph(amperage, 'Amperage')
-bar_graph(wattage, 'Wattage')
+plt.figure(num=1, figsize=(20,5))
+bar_graph(voltage, 'Voltage', 'r', totalPlots, 1)
+bar_graph(amperage, 'Amperage', 'g', totalPlots, 2)
+bar_graph(wattage, 'Wattage', 'b', totalPlots, 3)
+
+plt.show()
 
 #print voltage
 #print amperage
