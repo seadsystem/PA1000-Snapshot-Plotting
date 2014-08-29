@@ -125,10 +125,10 @@ def process(filename):
         if i!=0:
          wattage[i]=math.floor(wattage[i]*100000)/100000#*.50*wattage[0]
    f=open('samplefile.txt','w')
-   for i in range(0,voltage.len):
-      print >>f, voltage 
-      print >>f, amperage
-      print >>f, wattage
+ #  for i in range(0,voltage.len):
+ #     print >>f, voltage 
+ #     print >>f, amperage
+ #     print >>f, wattage
       # print voltage
    # print amperage
    # print wattage
