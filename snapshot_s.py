@@ -14,7 +14,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import math
-path='/Users/ali/phd/Data/Devices_signature'
+path='/home/seads/SEADS-Projects/SnapshotData'
+
 #finds a string between two strings
 def find_between(s, first, last):
    try:

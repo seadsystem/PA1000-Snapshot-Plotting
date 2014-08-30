@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import math
-path='/Users/ali/phd/Data/Devices_signature'
+path='/home/seads/SEADS-Projects/SnapshotData'
 #finds a string between two strings
 def find_between(s, first, last):
    try:
@@ -26,6 +26,7 @@ def find_between(s, first, last):
 
 #
 def normalize_list(word, v_list, a_list, w_list):
+   #print word
    if word.find("mV") != -1:
       #print word
       v_list.append(float(find_between(word, ',', ' mV')) * 0.001)
@@ -35,13 +36,13 @@ def normalize_list(word, v_list, a_list, w_list):
    elif word.find("mW") != -1:
       #print word
       w_list.append(float(find_between(word, ',', ' mW')) * 0.001)
-   elif word.find("μV") != -1:
+   elif word.find('μV') != -1:
       #print word
       v_list.append(float(find_between(word, ',', ' μV')) * 0.000001)
-   elif word.find("μA") != -1:
+   elif word.find('μA') != -1:
       #print word
       a_list.append(float(find_between(word, ',', ' μA')) * 0.000001)
-   elif word.find("μW") != -1:
+   elif word.find('μW') != -1:
       #print word
       w_list.append(float(find_between(word, ',', ' μW')) * 0.000001)
    elif word.find("nV") != -1:
@@ -87,24 +88,24 @@ def bar_graph(v_list, title, colorstring, totalPlots, plotNum):
 
    #plt.legend((p1[0], p2[0]), ('Voltage', 'Amperage'))
 
-def process(filename):
+def process(directory, signatures, currentDevice, filename):
    #checks for arguments, given usage
    # if len(sys.argv) < 2:
    #    print "Usage: " + sys.argv[0] + " [source]"
    #    exit(1)
    #path_filename=path+'/'+filename
-   read = open(filename,'r')
+   read = open(directory,'r')
    #read = open(sys.argv[1], 'r')
    #write = open(sys.argv[2], 'w')
 
    #main regex loop
-   regex = re.compile('Vh[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_]+|'
-                      'Ah[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_]+|'
-                      'Wh[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_]+')
+   regex = re.compile('Vh[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+|'
+                      'Ah[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+|'
+                      'Wh[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+')
    voltage = []
    amperage = []
    wattage = []
-
+   
    for line in read:
       usefuldata = regex.findall(line)
       for word in usefuldata:
@@ -112,19 +113,20 @@ def process(filename):
          normalize_list(word, voltage, amperage, wattage)
    #usage, specify total number of plots, because I modified bar_graph to subplot
    
-
    for i in range(len(voltage)):
         if i!=0:
-         voltage[i]=math.floor(voltage[i]*100000)/100000#*.50*voltage[0]
+         voltage[i]=math.floor(voltage[i]*1000000000)/1000000000
 
    for i in range(len(amperage)):
         if i!=0:
-         amperage[i]=math.floor(amperage[i]*100000)/100000#*.50*amperage[0]
-   
+         amperage[i]=math.floor(amperage[i]*1000000000)/1000000000
    for i in range(len(wattage)):
         if i!=0:
-         wattage[i]=math.floor(wattage[i]*100000)/100000#*.50*wattage[0]
-   f=open('samplefile.txt','w')
+         wattage[i]=math.floor(wattage[i]*1000000000)/1000000000
+   #add wattage, voltage, and amperage into device
+   signatures[currentDevice][filename] = {'Voltage': voltage, 'Amperage': amperage, 'Wattage': wattage}
+   
+ #  f=open('samplefile.txt','w')
  #  for i in range(0,voltage.len):
  #     print >>f, voltage 
  #     print >>f, amperage
@@ -139,7 +141,7 @@ def process(filename):
    bar_graph(amperage, 'Amperage', 'g', totalPlots, 2)
    bar_graph(wattage, 'Wattage', 'b', totalPlots, 3)
    plt.suptitle(filename, fontsize=16)
-  
+
    plt.show()
    read.close()
 
@@ -152,12 +154,30 @@ def get_immediate_subdirectories(a_dir):
     return [os.path.join(a_dir, name) for name in os.listdir(a_dir)
             if os.path.isdir(os.path.join(a_dir, name))]
 
+signatures = {}
+currentDevice = 'none'
+
+v = [1, 2, 3]
+c = [2, 1, 3]
+w = [3, 2, 1]
+
+test = {}
+test['device1'] = {}
+test['device1']['on'] = {'voltage', 'current', 'wattege'}
+print test
+
 for d in get_immediate_subdirectories(path):
    for f in os.listdir(d):
       full_path = d+'/'+f
+      deviceName = os.path.basename(os.path.normpath(d))
+      if deviceName not in signatures:
+         signatures[deviceName] = {}
+         currentDevice = deviceName
+      #if '_ON' in f:
+         #print f
       #print(full_path)
-      process(full_path)
-
+      process(full_path, signatures, currentDevice, f)
+print signatures;
 
 #for item in voltage:
 #   print item
