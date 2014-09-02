@@ -12,3 +12,5 @@ Useage: python plotall.py (change absolute path in code with variable "path")
 
 ##Important additional information
 Must have python numpy and matplotlib.pyplot python libraries installed to work
+
+Development using iPython
