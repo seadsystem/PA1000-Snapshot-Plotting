@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import math
+import random
 
 path='/home/seads/SEADS-Projects/SnapshotData'
 
@@ -72,35 +73,58 @@ def normalize_list(word, v_list, a_list, w_list):
       print "none"
 
 #creates a bar graph from a list of numbers with a random color
-def bar_graph(v_list, title, colorstring, totalPlots, plotNum):
-   ind1 = np.arange(len(v_list))    # the x locations for the groups   
-   #subplots bar graph   
-   plt.subplot(100 + totalPlots * 10 + plotNum)   
-   width = .5
-
-   p1 = plt.bar(ind1 + 0.75, v_list, width, color=colorstring, hold=True)
+def bar_graph(data, graph_type, arraysizes, colorpicker):
    
-   plt.ylabel('Nor`malized Units')
-   plt.title('Harmonics Amplitude of ' + title)
+   ind = np.arange(max(arraysizes))
+   width = 0.95/len(arraysizes)*3
+   
+   fig, ax = plt.subplots()
+   rects = []
+   filenames = []
+   i = 0
+   for folder in data:
+      for filename in data[folder]:
+         for harmonics in data[folder][filename]:
+            if harmonics == graph_type:
+               rects.append(ax.bar(ind + i*width, data[folder][filename][graph_type], width, color = colorpicker[i]))
+               #print colorpicker[i]
+               filenames.append(filename)
+               i = i + 1
+   ax.set_ylabel(graph_type)
+   ax.set_title('Amplitudes of ' + graph_type + ' harmonics')
+   ax.set_xticks(ind + 0.95/2)
+   ax.set_xticklabels(ind)
+   colors = []
+   for x in rects:
+      colors.append(x[0])
+   ax.legend(colors, filenames)
 
-   plt.xticks(ind1 + 1)
-   maxY = max(v_list)
-   if maxY!=0 :
-      plt.yticks(np.arange(-maxY/10, maxY + maxY/10, maxY/6))
+   plt.show()
+#plots everything given dictionary datastructure
+def plot_all(signature_dictionary):
+   #gets the sizes of each subsequential array
+   arraysizes = []
+   for folder in signature_dictionary:
+      #print folder, 'is the folder with'
+      for filename in signature_dictionary[folder]:
+         #print '   ', filename
+         for harmonics in signature_dictionary[folder][filename]:
+            #print '      ', signature_dictionary[folder][filename][harmonics]
+            arraysizes.append(len(signature_dictionary[folder][filename][harmonics]))
+   
+   colorpicker = []
+   for x in range(0, len(arraysizes)/3):
+      colorpicker.append((random.random(), random.random(), random.random()))
+   
 
-   #plt.legend((p1[0], p2[0]), ('Voltage', 'Amperage'))
+   bar_graph(signature_dictionary, 'Voltage', arraysizes, colorpicker)
+   bar_graph(signature_dictionary, 'Amperage', arraysizes, colorpicker)
+   bar_graph(signature_dictionary, 'Wattage', arraysizes, colorpicker)
 
 def process(directory, signatures, currentDevice, filename):
-   #checks for arguments, given usage
-   # if len(sys.argv) < 2:
-   #    print "Usage: " + sys.argv[0] + " [source]"
-   #    exit(1)
-   #path_filename=path+'/'+filename
+   #reads in file from the directory
    read = open(directory,'r')
-   #read = open(sys.argv[1], 'r')
-   #write = open(sys.argv[2], 'w')
-
-   #main regex loop
+   #regex for dissecting the voltage, amperage, or wattage harmonics
    regex = re.compile('Vh[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+|'
                       'Ah[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+|'
                       'Wh[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+')
@@ -113,60 +137,29 @@ def process(directory, signatures, currentDevice, filename):
       for word in usefuldata:
          #print word
          normalize_list(word, voltage, amperage, wattage)
-   #usage, specify total number of plots, because I modified bar_graph to subplot
-   
+
+   #takes off floating point inconsistencies with calculations
    for i in range(len(voltage)):
         if i!=0:
          voltage[i]=math.floor(voltage[i]*1000000000)/1000000000
-
    for i in range(len(amperage)):
         if i!=0:
          amperage[i]=math.floor(amperage[i]*1000000000)/1000000000
    for i in range(len(wattage)):
         if i!=0:
          wattage[i]=math.floor(wattage[i]*1000000000)/1000000000
+   
    #add wattage, voltage, and amperage into device
    signatures[currentDevice][filename] = {'Voltage': voltage, 'Amperage': amperage, 'Wattage': wattage}
-   
- #  f=open('samplefile.txt','w')
- #  for i in range(0,voltage.len):
- #     print >>f, voltage 
- #     print >>f, amperage
- #     print >>f, wattage
-      # print voltage
-   # print amperage
-   # print wattage
-   totalPlots = 3
-
-   plt.figure(num=1, figsize=(26,6))
-   bar_graph(voltage, 'Voltage','r', totalPlots, 1)
-   bar_graph(amperage, 'Amperage', 'g', totalPlots, 2)
-   bar_graph(wattage, 'Wattage', 'b', totalPlots, 3)
-   plt.suptitle(filename, fontsize=16)
-
-   plt.show()
+   #closes file from processing
    read.close()
 
-# for root,dirs, files in os.walk(path):
-#     print root
-#     print dirs
-#     print files
-    #process(f)
 def get_immediate_subdirectories(a_dir):
     return [os.path.join(a_dir, name) for name in os.listdir(a_dir)
             if os.path.isdir(os.path.join(a_dir, name))]
 
 signatures = {}
 currentDevice = 'none'
-
-v = [1, 2, 3]
-c = [2, 1, 3]
-w = [3, 2, 1]
-
-test = {}
-test['device1'] = {}
-test['device1']['on'] = {'voltage', 'current', 'wattege'}
-print test
 
 for d in get_immediate_subdirectories(path):
    for f in os.listdir(d):
@@ -175,14 +168,17 @@ for d in get_immediate_subdirectories(path):
       if deviceName not in signatures:
          signatures[deviceName] = {}
          currentDevice = deviceName
-      #if '_ON' in f:
-         #print f
       #print(full_path)
-      process(full_path, signatures, currentDevice, f)
-print signatures;
+      if deviceName == 'Combos':
+         continue
+      if deviceName == 'Base':
+         process(full_path, signatures, currentDevice, f)
+      if re.search('_on', f, re.IGNORECASE):
+         print f
+         process(full_path, signatures, currentDevice, f)
 
-#for item in voltage:
-#   print item
+plot_all(signatures)
+#print signatures['Computers']['Computer_1_on.csv']['Amperage']
 
-#write.close()
+
 
