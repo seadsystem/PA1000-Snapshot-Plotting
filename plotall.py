@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import math
 import random
+import argparse
 
 path='/home/seads/SEADS-Projects/SnapshotData'
 
@@ -74,10 +75,10 @@ def normalize_list(word, v_list, a_list, w_list):
 
 #creates a bar graph from a list of numbers with a random color
 def bar_graph(data, graph_type, arraysizes, colorpicker):
-   
+   #defines x axis
    ind = np.arange(max(arraysizes))
+   #defines width of each bar
    width = 0.95/len(arraysizes)*3
-   
    fig, ax = plt.subplots()
    rects = []
    filenames = []
@@ -112,16 +113,17 @@ def plot_all(signature_dictionary):
             #print '      ', signature_dictionary[folder][filename][harmonics]
             arraysizes.append(len(signature_dictionary[folder][filename][harmonics]))
    
+   #randomized color picker for graphs
    colorpicker = []
    for x in range(0, len(arraysizes)/3):
       colorpicker.append((random.random(), random.random(), random.random()))
-   
-
+   #bar graphs one at a time for voltage, amperage, and wattage
    bar_graph(signature_dictionary, 'Voltage', arraysizes, colorpicker)
    bar_graph(signature_dictionary, 'Amperage', arraysizes, colorpicker)
    bar_graph(signature_dictionary, 'Wattage', arraysizes, colorpicker)
 
-def process(directory, signatures, currentDevice, filename):
+#gets all of the data, and puts it into signatures
+def process(directory, signatures, currentDevice, filename, args):
    #reads in file from the directory
    read = open(directory,'r')
    #regex for dissecting the voltage, amperage, or wattage harmonics
@@ -138,19 +140,32 @@ def process(directory, signatures, currentDevice, filename):
          #print word
          normalize_list(word, voltage, amperage, wattage)
 
-   #takes off floating point inconsistencies with calculations
-   for i in range(len(voltage)):
-        if i!=0:
-         voltage[i]=math.floor(voltage[i]*1000000000)/1000000000
-   for i in range(len(amperage)):
-        if i!=0:
-         amperage[i]=math.floor(amperage[i]*1000000000)/1000000000
-   for i in range(len(wattage)):
-        if i!=0:
-         wattage[i]=math.floor(wattage[i]*1000000000)/1000000000
-   
+   #percentage of first harmonic
+   if args.per != None:
+      for i in range(len(voltage)):
+         if i!=0:
+            voltage[i] = voltage[0]*voltage[i]*int(args.per[0])/100
+      for i in range(len(amperage)):
+         if i!=0:
+            amperage[i] = amperage[0]*amperage[i]*int(args.per[0])/100
+      for i in range(len(wattage)):
+         if i!=0:
+            wattage[i] = wattage[0]*wattage[i]*int(args.per[0])/100
+   #normalizes
+   if args.norm == True:
+      maxVoltage = max(voltage)
+      maxAmperage = max(amperage)
+      maxWattage = max(wattage)
+      for i in range(len(voltage)):
+         voltage[i] = voltage[i]/maxVoltage
+      for i in range(len(amperage)):
+         amperage[i] = amperage[i]/maxAmperage
+      for i in range(len(wattage)):
+         wattage[i] = wattage[i]/maxWattage
+
    #add wattage, voltage, and amperage into device
-   signatures[currentDevice][filename] = {'Voltage': voltage, 'Amperage': amperage, 'Wattage': wattage}
+   signatures[currentDevice][filename] = {'Voltage': voltage,
+                  'Amperage': amperage, 'Wattage': wattage}
    #closes file from processing
    read.close()
 
@@ -158,8 +173,27 @@ def get_immediate_subdirectories(a_dir):
     return [os.path.join(a_dir, name) for name in os.listdir(a_dir)
             if os.path.isdir(os.path.join(a_dir, name))]
 
+#returns the args from the program input
+def get_args():
+   parser = argparse.ArgumentParser(description='Harmonic visualization. ' +
+                    'Normalization argument normalizes graph to 1,' +
+                    'Percentage increases numbers by % amount of the ' +
+                    'first harmonic.')
+   parser.add_argument('--norm', action='store_true')
+   parser.add_argument('--per', nargs=1)
+   args = parser.parse_args()
+   #printing for debugging args
+#   if args.per == None:
+#      print args.per
+#   else:
+#      print args.per[0]
+
+#   print args.norm
+   return args
+#gets args
+args = get_args()
 signatures = {}
-currentDevice = 'none'
+currentDevice = 'None'
 
 for d in get_immediate_subdirectories(path):
    for f in os.listdir(d):
@@ -172,13 +206,12 @@ for d in get_immediate_subdirectories(path):
       if deviceName == 'Combos':
          continue
       if deviceName == 'Base':
-         process(full_path, signatures, currentDevice, f)
+         process(full_path, signatures, currentDevice, f, args)
       if re.search('_on', f, re.IGNORECASE):
-         print f
-         process(full_path, signatures, currentDevice, f)
+         #print f
+         process(full_path, signatures, currentDevice, f, args)
 
 plot_all(signatures)
 #print signatures['Computers']['Computer_1_on.csv']['Amperage']
-
 
 
