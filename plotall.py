@@ -1,11 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # ============================================================
-# File: snapshot.py
-# Description: parses data to trim only things needed
-#              Usage: snapshot.py [source]
+# File: plotall.py
+# Description: plotall.py -h for information
 # Created by Henry Crute
-# 7/30/2014
+# 9/2/2014
 # ============================================================
 
 import re
