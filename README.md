@@ -6,7 +6,7 @@ Description: Takes a csv file from the PA1000 and plots all of the Voltage, Curr
 
 useage: snapshot.py [file.csv]
 ##plotall.py
-Description: Recursively reads all files in subfolders of path for harmonic visualization. Normalization argument normalizes graph to 2, percentage increases numbers by a percentage amount of the first harmonic. Change absolute path in code with variable "path")
+Description: Recursively reads all files in subfolders of path for harmonic visualization. Normalization argument normalizes graph to 2, percentage increases numbers by a percentage amount of the first harmonic. Change absolute path in code with variable 'path'.
 
 usage: plotall.py [-h] [--norm] [--per PER]
 
