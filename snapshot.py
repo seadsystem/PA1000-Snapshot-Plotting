@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 # ============================================================
 # File: snapshot.py
-# Description: parses data to trim only things needed
-#              Usage: snapshot.py [source]
+# Description: Takes a csv file from the PA1000 and plots all
+#              of the Voltage, Current, and Wattage harmonics
+#              usage: snapshot.py [source.csv]
 # Created by Henry Crute
 # 7/30/2014
 # ============================================================
