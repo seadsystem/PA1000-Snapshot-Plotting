@@ -2,13 +2,13 @@ Author: Henry Crute
 
 # Python plotter for PA1000 Shapshots
 ##snapshot.py
-Description: snapshot.py takes a csv file from the PA1000 and plots all of the Voltage, Current, and Wattage harmonics
+Description: Takes a csv file from the PA1000 and plots all of the Voltage, Current, and Wattage harmonics
 
 useage: snapshot.py [file.csv]
 ##plotall.py
-Description: plotall.py takes in all of the .csv files in a directory's subdirectories  and plots them comparatively
+Description: Recursively reads all files in subfolders of path for harmonic visualization. Normalization argument normalizes graph to 2, percentage increases numbers by a percentage amount of the first harmonic. Change absolute path in code with variable "path")
 
-usage: plotall.py [-h] [--norm] [--per PER] (change absolute path in code with variable "path")
+usage: plotall.py [-h] [--norm] [--per PER]
 
 ##Important additional information
 Must have python numpy and matplotlib.pyplot python libraries installed to work
