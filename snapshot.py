@@ -95,9 +95,9 @@ read = open(sys.argv[1], 'r')
 #write = open(sys.argv[2], 'w')
 
 #main regex loop
-regex = re.compile('Vh[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+|'
-                   'Ah[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+|'
-                   'Wh[0-9]+m,-?[0-9]+\.[0-9]+\s[A-Za-z_μ]+')
+regex = re.compile('Vh[0-9]+m,-?[0-9]+\.?[0-9]*\s[A-Za-z_μ]+|'
+                   'Ah[0-9]+m,-?[0-9]+\.?[0-9]*\s[A-Za-z_μ]+|'
+                   'Wh[0-9]+m,-?[0-9]+\.?[0-9]*\s[A-Za-z_μ]+')
 voltage = []
 amperage = []
 wattage = []
