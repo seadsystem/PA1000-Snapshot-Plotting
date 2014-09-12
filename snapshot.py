@@ -80,7 +80,10 @@ def bar_graph(v_list, title, colorstring, totalPlots, plotNum):
    plt.title('Harmonics Amplitude of ' + title)
 
    plt.xticks(ind1 + 1)
-   maxY = max(v_list)
+   if len(v_list) == 0:
+      maxY = 0
+   else:
+      maxY = max(v_list)
    plt.yticks(np.arange(-maxY/10, maxY + maxY/10, maxY/6))
 
    #plt.legend((p1[0], p2[0]), ('Voltage', 'Amperage'))
